@@ -21,7 +21,7 @@ This repository implements the following alignment strategies with SIMD accelera
 
 ```text
 ├── README.md
-├── Data/                  # (Created at runtime) synthetic sequences in FASTA/TXT format
+├── data/                  # (Created at runtime) synthetic sequences in FASTA/TXT format
 ├── docs/
 │   ├── c++_results.txt    # Example benchmark outputs for the C++ implementation
 │   ├── cpu.txt            # CPU specifications used for benchmarking
