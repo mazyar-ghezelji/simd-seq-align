@@ -1,0 +1,24 @@
+# Build artifacts
+/alignment
+/build/
+*.o
+*.obj
+*.exe
+*.out
+
+# Generated benchmark data
+/c++_results.txt
+/Data/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Editors/IDE
+.idea/
+.vscode/
+

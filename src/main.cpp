@@ -1184,8 +1184,8 @@ pair<vector<int16_t>, vector<string>> glocalAlignAVX256(const vector<pair<string
 
 int main()
 {
-    vector<pair<string, string>> temp = getInput("sequences.txt");
-    ofstream output("c++_results.txt");
+    vector<pair<string, string>> temp = getInput("Data/sequences.txt");
+    ofstream output("docs/c++_results.txt");
     output << "no cigar" << endl;
     int16_t size = 200;
 

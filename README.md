@@ -1,107 +1,130 @@
-# SIMD Sequence Alignment
+## SIMD Sequence Alignment
 
-An optimized C++ implementation of Global, Local, and Semi-Global sequence alignment algorithms using SIMD (Single Instruction, Multiple Data) intrinsics. This project explores performance acceleration for bioinformatics workloads, comparing raw C++ SIMD implementations against the SEQ programming language.
+An optimized C++ implementation of global, local, and semi-global sequence alignment algorithms using SIMD (Single Instruction, Multiple Data) intrinsics. The goal of this project is to explore performance acceleration for bioinformatics workloads by comparing hand-written C++ SIMD kernels against the SEQ programming language.
 
-## Supported Algorithms
+### Supported Algorithms
 
 This repository implements the following alignment strategies with SIMD acceleration:
 
-- **Global Alignment (Needleman-Wunsch):** Optimal alignment across the entire length of two sequences.
-- **Local Alignment (Smith-Waterman):** Finds the most similar regions between two sequences.
-- **Semi-Global Alignment:** Useful for finding a sequence within another (overlap alignment).
+- **Global alignment (Needleman–Wunsch)**: Optimal alignment across the full length of two sequences.
+- **Local alignment (Smith–Waterman)**: Detects the most similar local regions between two sequences.
+- **Semi-global alignment (overlap alignment)**: Useful when one sequence is expected to be contained within another.
 
-## Key Improvements
+### Technical Highlights
 
-- **SIMD Parallelization:** Utilizes instruction-level parallelism to process multiple data points in a single clock cycle.
-- **Performance Comparison:** Includes data comparing execution times with the **SEQ** programming language.
-- **Synthetic Data Generation:** A Python-based generator to create large-scale FASTA/TXT sequences for stress testing.
+- **SIMD parallelization**: Uses SSE (128-bit) and AVX2 (256-bit) intrinsics to process multiple cells of the dynamic programming (DP) matrix in parallel.
+- **Multiple optimization levels**: Scalar, SSE, and AVX variants for each alignment mode to make performance trade‑offs explicit.
+- **Benchmarking and reproducibility**: Includes scripts and result snapshots to reproduce timing experiments on synthetic reads.
+- **Synthetic data generation**: A small Python utility generates large FASTA/TXT datasets for stress testing.
 
-## Project Structure
+### Project Layout
 
-```
+```text
 ├── README.md
-├── Data/
-│   ├── sequences.fa       # Sample input sequences in FASTA format
-│   └── sequences.txt      # Sample input sequences in plain text
+├── Data/                  # (Created at runtime) synthetic sequences in FASTA/TXT format
 ├── docs/
-│   ├── c++_results.txt    # Benchmark outputs for the C++ implementation
+│   ├── c++_results.txt    # Example benchmark outputs for the C++ implementation
 │   ├── cpu.txt            # CPU specifications used for benchmarking
-│   └── seq_results.txt    # Benchmark outputs for the SEQ language comparison
+│   └── seq_results.txt    # Example benchmark outputs for the SEQ comparison
 └── src/
     ├── generator.py       # Python script to generate random DNA sequences
-    ├── main.cpp           # Core SIMD implementation of alignment algorithms
+    ├── main.cpp           # Core SIMD implementation and benchmarking harness
     └── main.seq           # SEQ implementation for comparison
 ```
 
-## Prerequisites
+## Getting Started
 
-- C++ compiler with SIMD support (e.g., g++ with AVX and SSE flags)
-- Python 3 for data generation
-- SEQ programming language for comparison benchmarks
+### Prerequisites
 
-## Installation and Setup
+- A C++ compiler with SIMD support (e.g. `g++` or `clang++` with AVX and SSE4.2 enabled).
+- Python 3 (for synthetic data generation).
+- The SEQ programming language (only required if you want to re‑run SEQ benchmarks).
 
-1. **Clone the repository:**
+### Clone the repository
 
-   ```bash
-   git clone https://github.com/yourusername/SIMD-coding.git
-   cd SIMD-coding
-   ```
+```bash
+git clone https://github.com/your-username/simd-seq-align.git
+cd simd-seq-align
+```
 
-2. **Generate test data (optional, pre-generated data is included):**
-   ```bash
-   cd src
-   python3 generator.py
-   mv sequences.txt ../Data/
-   mv sequences.fa ../Data/
-   ```
+### Generate synthetic test data (optional)
+
+Pre-generated benchmark data is included under `docs/`, but you can regenerate the input sequences used by both the C++ and SEQ implementations:
+
+```bash
+cd src
+python3 generator.py
+mkdir -p ../Data
+mv sequences.txt ../Data/
+mv sequences.fa  ../Data/
+cd ..
+```
 
 ## Building and Running
 
-1. **Compile the C++ code:**
+### Build the C++ benchmarks
 
-   ```bash
-   cd src
-   g++ -O3 -mavx -msse4.2 -std=c++11 main.cpp -o alignment
-   ```
+From the project root you can either use the provided `Makefile`:
 
-2. **Run the C++ benchmarks:**
+```bash
+make
+```
 
-   ```bash
-   ./alignment
-   ```
+or invoke the compiler directly:
 
-   This will generate `c++_results.txt` in the `docs/` directory with timing results.
+```bash
+g++ -O3 -mavx -msse4.2 -std=c++11 src/main.cpp -o alignment
+```
 
-3. **Run the SEQ benchmarks (requires SEQ installed):**
-   ```bash
-   seq main.seq
-   ```
-   Results will be printed to stdout and can be redirected to `docs/seq_results.txt`.
+Both options produce an `alignment` executable in the repository root.
 
-## Results
+### Run the C++ benchmarks
 
-Benchmark results are stored in the `docs/` folder:
+```bash
+./alignment
+```
 
-- `c++_results.txt`: Timing for scalar, SSE, and AVX implementations with and without CIGAR string generation.
-- `seq_results.txt`: Timing for SEQ implementations.
-- `cpu.txt`: CPU details for the benchmarking machine.
+The program reads synthetic pairs from `Data/sequences.txt` (generated by `generator.py`) and writes timing results to `docs/c++_results.txt`. The repository also includes a snapshot of results under `docs/c++_results.txt` for reference.
 
-Example C++ results (times in milliseconds for 10 runs averaged):
+### Run the SEQ benchmarks (optional)
 
-- Global AVX: ~5729 ms (no CIGAR), ~6032 ms (with CIGAR)
-- Local AVX: ~7685 ms (no CIGAR), ~7714 ms (with CIGAR)
-- Semi-Global AVX: ~6039 ms (no CIGAR), ~6079 ms (with CIGAR)
+If you have SEQ installed, you can run the comparison benchmarks:
 
-SEQ results (times in seconds):
+```bash
+cd src
+seq main.seq
+```
 
-- Scalar without CIGAR: 0.304817 s
-- Scalar with CIGAR: 0.36378 s
+Results are printed to stdout; the file `docs/seq_results.txt` contains one set of recorded results.
+
+## Benchmark Results
+
+Summary of the included C++ results (times in milliseconds, averaged over 10 runs) from `docs/c++_results.txt`:
+
+- **Global alignment (AVX)**: ~5729 ms (no CIGAR), ~6032 ms (with CIGAR)
+- **Local alignment (AVX)**:  ~7685 ms (no CIGAR), ~7714 ms (with CIGAR)
+- **Semi-global (AVX)**:      ~6039 ms (no CIGAR), ~6079 ms (with CIGAR)
+
+SEQ results (times in seconds) from `docs/seq_results.txt`:
+
+- **Scalar without CIGAR**: 0.304817 s
+- **Scalar with CIGAR**:    0.36378 s
+
+These numbers are meant to illustrate relative behavior (scalar vs SIMD, C++ vs SEQ) rather than serve as definitive benchmarks across hardware.
+
+## Extending the Project
+
+There are several natural extensions if you want to evolve this into a larger portfolio piece:
+
+- **Different scoring schemes**: Plug in affine gap penalties or substitution matrices.
+- **Larger SIMD widths**: Experiment with AVX‑512 where available.
+- **Real-world datasets**: Replace synthetic reads with public reference datasets.
+- **Visualization**: Add small scripts/notebooks to plot throughput and speed‑ups.
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+Contributions and suggestions are welcome. Feel free to open an issue or submit a pull request with improvements or new experiments.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the `LICENSE` file for details.

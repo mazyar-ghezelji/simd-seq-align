@@ -4,8 +4,9 @@ import time
 sequences = []
 queries = []
 targets = []
-#constructing pairs
-for r in FASTA('sequences.fa',fai=False):
+
+# constructing pairs from synthetic data under ../Data
+for r in FASTA('../Data/sequences.fa', fai=False):
     sequences.append(r.seq)
 for i in range(len(sequences)-1):
     queries.append(sequences[i])
